@@ -1,13 +1,38 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import './index.css';
-import App from './App';
+import './styles/index.css';
+import App from './components/App';
 import reportWebVitals from './reportWebVitals';
+import { BrowserRouter } from 'react-router-dom';
 
+// 1 import all dependencies from apollo client
+import {
+  ApolloProvider,
+  ApolloClient,
+  createHttpLink,
+  InMemoryCache
+} from '@apollo/client';
+
+
+// 2 create httpLink that connects apolloclient instance with graphql
+// Graphql server will be running on localhost:4000
+const httpLink = createHttpLink({
+  uri: 'http://localhost:4000'
+});
+
+// 3 instantiate apolloclient by passing httplink and new instance of inmemorycache
+const client = new ApolloClient({
+  link: httpLink,
+  cache: new InMemoryCache()
+});
+
+// 4 wrapped with apolloprovider and pass client as prop
 ReactDOM.render(
-  <React.StrictMode>
-    <App />
-  </React.StrictMode>,
+  <BrowserRouter>
+    <ApolloProvider client={client}>
+      <App />
+    </ApolloProvider>
+  </BrowserRouter>,
   document.getElementById('root')
 );
 
