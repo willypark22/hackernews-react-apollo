@@ -4,6 +4,7 @@ import './styles/index.css';
 import App from './components/App';
 import reportWebVitals from './reportWebVitals';
 import { BrowserRouter } from 'react-router-dom';
+import { setContext } from '@apollo/client/link/context';
 
 // 1 import all dependencies from apollo client
 import {
@@ -12,6 +13,7 @@ import {
   createHttpLink,
   InMemoryCache
 } from '@apollo/client';
+import { AUTH_TOKEN } from './Constants';
 
 
 // 2 create httpLink that connects apolloclient instance with graphql
@@ -20,9 +22,23 @@ const httpLink = createHttpLink({
   uri: 'http://localhost:4000'
 });
 
+const authLink = setContext((_, { headers }) => {
+
+  // get the authentication token from local storage if it exists
+  const token = localStorage.getItem(AUTH_TOKEN);
+
+  // return the headers to the context so httpLink can read them
+  return {
+    headers: {
+      ...headers,
+      authorization: token ? `Bearer ${token}` : ''
+    }
+  };
+});
+
 // 3 instantiate apolloclient by passing httplink and new instance of inmemorycache
 const client = new ApolloClient({
-  link: httpLink,
+  link: authLink.concat(httpLink),
   cache: new InMemoryCache()
 });
 
